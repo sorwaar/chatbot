@@ -19,9 +19,15 @@ app.get('/', function (req, res) {
 	res.send('you are in wrong place')
 })
 
+// recommended to inject access tokens as environmental variables, e.g.
+
+
+ const token = process.env.FB_VERIFY_TOKEN
+ const access = process.env.FB_PAGE_ACCESS_TOKEN
+
 // for facebook verification
 app.get('/webhook/', function (req, res) {
-	if (req.query['hub.verify_token'] === 'sorwar') {
+	if (req.query['hub.verify_token'] === token) {
 		res.send(req.query['hub.challenge'])
 	}
 		res.send('Error, wrong token')
@@ -65,9 +71,7 @@ function decideMessage(sender, text1){
 }
 
 
-// recommended to inject access tokens as environmental variables, e.g.
-// const token = process.env.FB_PAGE_ACCESS_TOKEN
-let token = "faketokenmpt14oeOY8UQPeufCFRIU6jfQhVwUK7xGBGx5VNBz2oImXDZBwZDZD"
+
 
 function sendTextMessage(sender, text) {
 	let messageData = { text:text }
@@ -105,7 +109,7 @@ function sendRequest(sender, messageData){
 
 	request({
 		url: 'https://graph.facebook.com/v2.6/me/messages',
-		qs: {access_token:token},
+		qs: {access_token:access},
 		method: 'POST',
 		json: {
 			recipient: {id:sender},
