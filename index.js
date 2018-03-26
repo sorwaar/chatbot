@@ -1,13 +1,4 @@
-//This is still work in progress
-/*
-Please report any bugs to nicomwaks@gmail.com
 
-i have added console.log on line 48 
-
-
-
-
- */
 'use strict'
 
 const express = require('express')
@@ -25,16 +16,16 @@ app.use(bodyParser.json())
 
 // index
 app.get('/', function (req, res) {
-	res.send('hello world i am a secret bot')
+	res.send('you are in wrong place')
 })
 
 // for facebook verification
 app.get('/webhook/', function (req, res) {
 	if (req.query['hub.verify_token'] === 'sorwar') {
 		res.send(req.query['hub.challenge'])
-	} else {
-		res.send('Error, wrong token')
 	}
+		res.send('Error, wrong token')
+	
 })
 
 // to post data
@@ -45,79 +36,73 @@ app.post('/webhook/', function (req, res) {
 		let sender = event.sender.id
 		if (event.message && event.message.text) {
 			let text = event.message.text
-			if (text === 'Generic'){ 
-				console.log("welcome to chatbot")
-				//sendGenericMessage(sender)
-				continue
-			}
-			sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
+
+			decideMessage(sender, text )
+			//sendTextMessage(sender, "hmm ki  " + text.substring(0, 200))
 		}
 		if (event.postback) {
 			let text = JSON.stringify(event.postback)
-			sendTextMessage(sender, "Postback received: "+text.substring(0, 200), token)
+			decideMessage(sender, text)
+			//sendTextMessage(sender, "Postback received: "+text.substring(0, 200), token)
 			continue
 		}
 	}
 	res.sendStatus(200)
 })
 
+function decideMessage(sender, text1){
+	let text = text1.toLowerCase()
+	if(text.includes("summer")){
+		sendTextMessage(sender, "ke tui?")
+
+	}else if (text.includes("winter")) {
+		sendTextMessage(sender, "fuck off")
+
+	} else {
+		sendTextMessage(sender, "I like Fall")
+		sendButtonMessage(sender, "What is Your favourite season?")
+	}
+}
+
 
 // recommended to inject access tokens as environmental variables, e.g.
 // const token = process.env.FB_PAGE_ACCESS_TOKEN
-const token = "<FB_PAGE_ACCESS_TOKEN>"
+let token = "faketokenmpt14oeOY8UQPeufCFRIU6jfQhVwUK7xGBGx5VNBz2oImXDZBwZDZD"
 
 function sendTextMessage(sender, text) {
 	let messageData = { text:text }
-	
-	request({
-		url: 'https://graph.facebook.com/v2.6/me/messages',
-		qs: {access_token:token},
-		method: 'POST',
-		json: {
-			recipient: {id:sender},
-			message: messageData,
-		}
-	}, function(error, response, body) {
-		if (error) {
-			console.log('Error sending messages: ', error)
-		} else if (response.body.error) {
-			console.log('Error: ', response.body.error)
-		}
-	})
+	sendRequest(sender, messageData)
 }
 
-function sendGenericMessage(sender) {
-	let messageData = {
-		"attachment": {
-			"type": "template",
-			"payload": {
-				"template_type": "generic",
-				"elements": [{
-					"title": "First card",
-					"subtitle": "Element #1 of an hscroll",
-					"image_url": "http://messengerdemo.parseapp.com/img/rift.png",
-					"buttons": [{
-						"type": "web_url",
-						"url": "https://www.messenger.com",
-						"title": "web url"
-					}, {
-						"type": "postback",
-						"title": "Postback",
-						"payload": "Payload for first element in a generic bubble",
-					}],
-				}, {
-					"title": "Second card",
-					"subtitle": "Element #2 of an hscroll",
-					"image_url": "http://messengerdemo.parseapp.com/img/gearvr.png",
-					"buttons": [{
-						"type": "postback",
-						"title": "Postback",
-						"payload": "Payload for second element in a generic bubble",
-					}],
-				}]
-			}
-		}
+
+function sendButtonMessage(sender, text){
+		let messageData = {
+			"attachment":{
+	      "type":"template",
+	      "payload":{
+	        "template_type":"button",
+	        "text":text,
+	        "buttons":[
+	          {
+	            "type":"postback",
+	            "title":"Summer",
+	            "payload":"summer"
+	          },
+	          {
+	            "type":"postback",
+	            "title":"Winter",
+	            "payload":"winter"
+	          }
+	          
+	        ]
+	      }
+	    }		
 	}
+	sendRequest(sender, messageData)
+}
+
+function sendRequest(sender, messageData){
+
 	request({
 		url: 'https://graph.facebook.com/v2.6/me/messages',
 		qs: {access_token:token},
@@ -133,6 +118,7 @@ function sendGenericMessage(sender) {
 			console.log('Error: ', response.body.error)
 		}
 	})
+
 }
 
 // spin spin sugar
